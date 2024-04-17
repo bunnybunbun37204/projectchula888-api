@@ -1,5 +1,5 @@
 import { Hono } from "hono";
-import student from "./student";
+import student from "./student/student";
 
 const app = new Hono();
 
