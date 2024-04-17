@@ -43,6 +43,21 @@ student.get("/:id", async (c) => {
   }
 });
 
+student.get("/", async (c) => {
+  const adapter = new PrismaD1(c.env.DB);
+  const prisma = new PrismaClient({ adapter });
+
+  try {
+    const data = await prisma.student.findMany();
+    return c.json({ data });
+  } catch (e) {
+    throw new HTTPException(400, {
+      message: (e as Error).message,
+      cause: (e as Error).cause,
+    });
+  }
+});
+
 student.post("/", async (c) => {
   const adapter = new PrismaD1(c.env.DB);
   const prisma = new PrismaClient({ adapter });
