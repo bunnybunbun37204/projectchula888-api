@@ -12,8 +12,28 @@ const student = new Hono<{ Bindings: Binding }>();
 student.get("/count", async (c) => {
   const adapter = new PrismaD1(c.env.DB);
   const prisma = new PrismaClient({ adapter });
-  const count = prisma.student.count();
-  return c.json({ count });
+  try {
+    const count = await prisma.student.count();
+    return c.json({ count });
+  } catch (e) {
+    throw new HTTPException(401, { cause: e });
+  }
+});
+
+student.get("/student/:id", async (c) => {
+  const adapter = new PrismaD1(c.env.DB);
+  const prisma = new PrismaClient({ adapter });
+  const id = Number.parseInt(c.req.param("id"));
+
+  try {
+    const data = await prisma.student.findMany({
+      where: {
+        Student_id: id,
+      },
+    });
+  } catch (e) {
+    throw new HTTPException(401, { cause: e });
+  }
 });
 
 student.post("/create", async (c) => {
@@ -30,6 +50,43 @@ student.post("/create", async (c) => {
       },
     });
     return c.json({ message: "User create" }, 200);
+  } catch (e) {
+    throw new HTTPException(401, { cause: e });
+  }
+});
+
+student.patch("/update", async (c) => {
+  const adapter = new PrismaD1(c.env.DB);
+  const prisma = new PrismaClient({ adapter });
+
+  const data = await c.req.json<Student>();
+  try {
+    await prisma.student.update({
+      where: {
+        Student_id: data.Student_id,
+      },
+      data: {
+        name: data.name,
+        email: data.email,
+        major: data.major,
+      },
+    });
+  } catch (e) {
+    throw new HTTPException(401, { cause: e });
+  }
+});
+
+student.delete("/delete", async (c) => {
+  const adapter = new PrismaD1(c.env.DB);
+  const prisma = new PrismaClient({ adapter });
+
+  const data = await c.req.json<Student>();
+  try {
+    await prisma.student.delete({
+      where: {
+        Student_id: data.Student_id,
+      },
+    });
   } catch (e) {
     throw new HTTPException(401, { cause: e });
   }
