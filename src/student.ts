@@ -16,7 +16,10 @@ student.get("/count", async (c) => {
     const count = await prisma.student.count();
     return c.json({ count });
   } catch (e) {
-    throw new HTTPException(400, { cause: e.message });
+    throw new HTTPException(400, {
+      message: (e as Error).message,
+      cause: (e as Error).cause,
+    });
   }
 });
 
@@ -33,7 +36,10 @@ student.get("/student/:id", async (c) => {
     });
     return c.json({ data });
   } catch (e) {
-    throw new HTTPException(400, { cause: e.message });
+    throw new HTTPException(400, {
+      message: (e as Error).message,
+      cause: (e as Error).cause,
+    });
   }
 });
 
@@ -52,7 +58,10 @@ student.post("/create", async (c) => {
     });
     return c.json({ message: "User create" }, 200);
   } catch (e) {
-    throw new HTTPException(400, { cause: e.message });
+    throw new HTTPException(400, {
+      message: (e as Error).message,
+      cause: (e as Error).cause,
+    });
   }
 });
 
@@ -73,7 +82,10 @@ student.patch("/update", async (c) => {
       },
     });
   } catch (e) {
-    throw new HTTPException(400, { cause: e.message });
+    throw new HTTPException(400, {
+      message: (e as Error).message,
+      cause: (e as Error).cause,
+    });
   }
 });
 
@@ -89,7 +101,10 @@ student.delete("/delete", async (c) => {
       },
     });
   } catch (e) {
-    throw new HTTPException(400, { cause: e.message });
+    throw new HTTPException(400, {
+      message: (e as Error).message,
+      cause: (e as Error).cause,
+    });
   }
 });
 
