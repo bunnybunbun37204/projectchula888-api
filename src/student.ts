@@ -23,7 +23,7 @@ student.get("/count", async (c) => {
   }
 });
 
-student.get("/student/:id", async (c) => {
+student.get("/:id", async (c) => {
   const adapter = new PrismaD1(c.env.DB);
   const prisma = new PrismaClient({ adapter });
   const id = Number.parseInt(c.req.param("id"));
@@ -43,7 +43,7 @@ student.get("/student/:id", async (c) => {
   }
 });
 
-student.post("/create", async (c) => {
+student.post("/", async (c) => {
   const adapter = new PrismaD1(c.env.DB);
   const prisma = new PrismaClient({ adapter });
 
@@ -65,7 +65,7 @@ student.post("/create", async (c) => {
   }
 });
 
-student.patch("/update", async (c) => {
+student.patch("/", async (c) => {
   const adapter = new PrismaD1(c.env.DB);
   const prisma = new PrismaClient({ adapter });
 
@@ -90,7 +90,7 @@ student.patch("/update", async (c) => {
   }
 });
 
-student.delete("/delete", async (c) => {
+student.delete("/", async (c) => {
   const adapter = new PrismaD1(c.env.DB);
   const prisma = new PrismaClient({ adapter });
 
