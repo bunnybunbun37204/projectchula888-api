@@ -31,6 +31,7 @@ student.get("/student/:id", async (c) => {
         Student_id: id,
       },
     });
+    return c.json({ data });
   } catch (e) {
     throw new HTTPException(401, { cause: e });
   }
