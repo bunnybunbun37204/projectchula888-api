@@ -81,6 +81,7 @@ student.patch("/update", async (c) => {
         major: data.major,
       },
     });
+    return c.json({ message: "Update success" });
   } catch (e) {
     throw new HTTPException(400, {
       message: (e as Error).message,
@@ -100,6 +101,7 @@ student.delete("/delete", async (c) => {
         Student_id: data.Student_id,
       },
     });
+    return c.json({ message: "Delete success" });
   } catch (e) {
     throw new HTTPException(400, {
       message: (e as Error).message,
