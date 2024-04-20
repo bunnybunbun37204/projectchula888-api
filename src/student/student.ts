@@ -123,7 +123,6 @@ student.delete("/", async (c) => {
   }
 });
 
-
 student.onError((err, c) => {
   if (err instanceof HTTPException) {
     return err.getResponse();
