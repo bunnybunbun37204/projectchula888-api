@@ -8,6 +8,10 @@ app.get("/", (c) => {
   return c.text("Hello Hono!");
 });
 
+app.notFound((c) => {
+  return c.text("Page not found please check API docs in github kub pom", 404);
+});
+
 app.route("/student", student);
 app.route("/project", project);
 
