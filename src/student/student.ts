@@ -2,10 +2,8 @@ import { Hono } from "hono";
 import { PrismaClient, Student } from "@prisma/client";
 import { PrismaD1 } from "@prisma/adapter-d1";
 import { HTTPException } from "hono/http-exception";
+import { Binding } from "../../type";
 
-type Binding = {
-  DB: D1Database;
-};
 
 const student = new Hono<{ Bindings: Binding }>();
 
@@ -123,6 +121,14 @@ student.delete("/", async (c) => {
       cause: (e as Error).cause,
     });
   }
+});
+
+
+student.onError((err, c) => {
+  if (err instanceof HTTPException) {
+    return err.getResponse();
+  }
+  return c.json({message: "error"});
 });
 
 export default student;
