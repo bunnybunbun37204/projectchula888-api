@@ -10,15 +10,8 @@ project.get("/", async (c) => {
   const adapter = new PrismaD1(c.env.DB);
   const prisma = new PrismaClient({ adapter });
 
-  try {
-    const result = await prisma.project.findMany();
-    return c.json({ result });
-  } catch (e) {
-    throw new HTTPException(400, {
-      message: (e as Error).message,
-      cause: (e as Error).cause,
-    });
-  }
+  const result = await prisma.project.findMany();
+  return c.json({ result });
 });
 
 project.post("/", async (c) => {
