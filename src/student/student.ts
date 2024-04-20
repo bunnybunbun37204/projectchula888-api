@@ -4,21 +4,13 @@ import { PrismaD1 } from "@prisma/adapter-d1";
 import { HTTPException } from "hono/http-exception";
 import { Binding } from "../../type";
 
-
 const student = new Hono<{ Bindings: Binding }>();
 
 student.get("/count", async (c) => {
   const adapter = new PrismaD1(c.env.DB);
   const prisma = new PrismaClient({ adapter });
-  try {
-    const count = await prisma.student.count();
-    return c.json({ count });
-  } catch (e) {
-    throw new HTTPException(400, {
-      message: (e as Error).message,
-      cause: (e as Error).cause,
-    });
-  }
+  const count = await prisma.student.count();
+  return c.json({ count });
 });
 
 student.get("/:id", async (c) => {
@@ -26,34 +18,20 @@ student.get("/:id", async (c) => {
   const prisma = new PrismaClient({ adapter });
   const id = Number.parseInt(c.req.param("id"));
 
-  try {
-    const data = await prisma.student.findMany({
-      where: {
-        Student_id: id,
-      },
-    });
-    return c.json({ data });
-  } catch (e) {
-    throw new HTTPException(400, {
-      message: (e as Error).message,
-      cause: (e as Error).cause,
-    });
-  }
+  const data = await prisma.student.findMany({
+    where: {
+      Student_id: id,
+    },
+  });
+  return c.json({ data });
 });
 
 student.get("/", async (c) => {
   const adapter = new PrismaD1(c.env.DB);
   const prisma = new PrismaClient({ adapter });
 
-  try {
-    const data = await prisma.student.findMany();
-    return c.json({ data });
-  } catch (e) {
-    throw new HTTPException(400, {
-      message: (e as Error).message,
-      cause: (e as Error).cause,
-    });
-  }
+  const data = await prisma.student.findMany();
+  return c.json({ data });
 });
 
 student.post("/", async (c) => {
@@ -61,21 +39,14 @@ student.post("/", async (c) => {
   const prisma = new PrismaClient({ adapter });
 
   const data = await c.req.json<Student>();
-  try {
-    await prisma.student.create({
-      data: {
-        name: data.name,
-        email: data.email,
-        major: data.major,
-      },
-    });
-    return c.json({ message: "User create" }, 200);
-  } catch (e) {
-    throw new HTTPException(400, {
-      message: (e as Error).message,
-      cause: (e as Error).cause,
-    });
-  }
+  await prisma.student.create({
+    data: {
+      name: data.name,
+      email: data.email,
+      major: data.major,
+    },
+  });
+  return c.json({ message: "User create" }, 200);
 });
 
 student.patch("/", async (c) => {
@@ -83,24 +54,18 @@ student.patch("/", async (c) => {
   const prisma = new PrismaClient({ adapter });
 
   const data = await c.req.json<Student>();
-  try {
-    await prisma.student.update({
-      where: {
-        Student_id: data.Student_id,
-      },
-      data: {
-        name: data.name,
-        email: data.email,
-        major: data.major,
-      },
-    });
-    return c.json({ message: "Update success" });
-  } catch (e) {
-    throw new HTTPException(400, {
-      message: (e as Error).message,
-      cause: (e as Error).cause,
-    });
-  }
+
+  await prisma.student.update({
+    where: {
+      Student_id: data.Student_id,
+    },
+    data: {
+      name: data.name,
+      email: data.email,
+      major: data.major,
+    },
+  });
+  return c.json({ message: "Update success" });
 });
 
 student.delete("/", async (c) => {
@@ -108,26 +73,24 @@ student.delete("/", async (c) => {
   const prisma = new PrismaClient({ adapter });
 
   const data = await c.req.json<Student>();
-  try {
-    await prisma.student.delete({
-      where: {
-        Student_id: data.Student_id,
-      },
-    });
-    return c.json({ message: "Delete success" });
-  } catch (e) {
-    throw new HTTPException(400, {
-      message: (e as Error).message,
-      cause: (e as Error).cause,
-    });
-  }
+
+  await prisma.student.delete({
+    where: {
+      Student_id: data.Student_id,
+    },
+  });
+
+  return c.json({ message: "Delete success" });
 });
 
-student.onError((err, c) => {
+student.onError((err) => {
   if (err instanceof HTTPException) {
     return err.getResponse();
   }
-  return c.json({message: "error"});
+  throw new HTTPException(400, {
+    message: (err as Error).message,
+    cause: (err as Error).cause,
+  });
 });
 
 export default student;
