@@ -46,7 +46,7 @@ student.post("/", async (c) => {
       major: data.major,
     },
   });
-  return c.json({ message: "User create" }, 200);
+  return c.json({ message: "User created" }, 200);
 });
 
 student.patch("/", async (c) => {
