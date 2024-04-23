@@ -13,45 +13,44 @@ datasource db {
 }
 
 model Student {
-    Student_id Int     @id @default(autoincrement())
-    email      String  @unique
-    name       String
-    major      String
-    projects   Project_Student[]
+  student_id String      @id
+  email      String      @unique
+  name       String
+  major      String
+  projects   Project_Student[]
 }
 
 model Project {
-    Project_id   Int           @id @default(autoincrement())
-    title        String
-    description  String?
-    startDate    DateTime 
-    endDate      DateTime
-    status       String
-    students     Project_Student[]
-    advisors     Project_advisor[]
+  project_id   Int            @id @default(autoincrement())
+  title        String
+  description  String?
+  startDate    DateTime 
+  endDate      DateTime
+  status       String
+  students     Project_Student[]
+  advisors     Project_advisor[]
 }
 
-model advisors {
-    advisors_id  Int     @id @default(autoincrement())
-    name         String
-    department   String
-    email        String  @unique
-    projects     Project_advisor[]
+model Advisor {
+  advisor_id  String      @id
+  name        String
+  department  String
+  email       String      @unique
+  projects    Project_advisor[]
 }
 
 model Project_Student {
-    id           Int      @id @default(autoincrement())
-    student      Student  @relation(fields: [studentId], references: [Student_id])
-    studentId    Int
-    project      Project  @relation(fields: [projectId], references: [Project_id])
-    projectId    Int
+  id           Int       @id @default(autoincrement())
+  student      Student   @relation(fields: [student_id], references: [student_id])
+  student_id   String
+  project      Project   @relation(fields: [project_id], references: [project_id])
+  project_id   Int
 }
 
 model Project_advisor {
-    id           Int       @id @default(autoincrement())
-    advisor      advisors  @relation(fields: [advisorId], references: [advisors_id])
-    advisorId    Int
-    project      Project   @relation(fields: [projectId], references: [Project_id])
-    projectId    Int
+  id           Int       @id @default(autoincrement())
+  advisor      Advisor   @relation(fields: [advisor_id], references: [advisor_id])
+  advisor_id   String
+  project      Project   @relation(fields: [project_id], references: [project_id])
+  project_id   Int
 }
-

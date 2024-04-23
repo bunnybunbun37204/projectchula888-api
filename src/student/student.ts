@@ -16,11 +16,11 @@ student.get("/count", async (c) => {
 student.get("/:id", async (c) => {
   const adapter = new PrismaD1(c.env.DB);
   const prisma = new PrismaClient({ adapter });
-  const id = Number.parseInt(c.req.param("id"));
+  const id = c.req.param("id");
 
   const data = await prisma.student.findMany({
     where: {
-      Student_id: id,
+      student_id: id,
     },
   });
   return c.json({ data });
@@ -41,6 +41,7 @@ student.post("/", async (c) => {
   const data = await c.req.json<Student>();
   await prisma.student.create({
     data: {
+      student_id: data.student_id,
       name: data.name,
       email: data.email,
       major: data.major,
@@ -57,7 +58,7 @@ student.patch("/", async (c) => {
 
   await prisma.student.update({
     where: {
-      Student_id: data.Student_id,
+      student_id: data.student_id,
     },
     data: {
       name: data.name,
@@ -76,7 +77,7 @@ student.delete("/", async (c) => {
 
   await prisma.student.delete({
     where: {
-      Student_id: data.Student_id,
+      student_id: data.student_id,
     },
   });
 

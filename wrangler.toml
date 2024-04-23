@@ -16,7 +16,7 @@ node_compat = true
 [[d1_databases]]
 binding = "DB"
 database_name = "project888"
-database_id = "e57a9f3f-6ace-4cf2-a0c8-ae9d0280fc6f"
+database_id = "13666e3a-8af7-40e6-8654-87c26fb8f1bb"
 
 # [ai]
 # binding = "AI"

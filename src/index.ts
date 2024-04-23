@@ -1,7 +1,10 @@
 import { Hono } from "hono";
-import { logger } from 'hono/logger'
+import { logger } from "hono/logger";
 import student from "./student/student";
 import project from "./project/project";
+import advisor from "./advisor/advisor";
+import project_advisor from "./project_advisor/project_advisor";
+import project_student from "./project_student/project_student";
 
 const app = new Hono();
 
@@ -17,5 +20,8 @@ app.notFound((c) => {
 
 app.route("/student", student);
 app.route("/project", project);
+app.route("/advisor", advisor);
+app.route("/project_advisor", project_advisor);
+app.route("/project_student", project_student);
 
 export default app;
