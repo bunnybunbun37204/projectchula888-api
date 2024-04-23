@@ -41,6 +41,7 @@ student.post("/", async (c) => {
   const data = await c.req.json<Student>();
   await prisma.student.create({
     data: {
+      //Student_id: data.Student_id,
       name: data.name,
       email: data.email,
       major: data.major,

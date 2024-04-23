@@ -13,14 +13,14 @@ project_advisor.get("/count", async (c) => {
     return c.json({ count });
 });
 
-project_advisor.get("/:pjId", async (c) => {
+project_advisor.get("/:advId", async (c) => {
     const adapter = new PrismaD1(c.env.DB);
     const prisma = new PrismaClient({ adapter });
-    const project_id = Number.parseInt(c.req.param("pjId"));
+    const advisor_id = Number.parseInt(c.req.param("advId"));
   
     const data = await prisma.project_advisor.findMany({
       where: {
-        projectId: project_id,
+        advisorId: advisor_id,
       },
     });
     return c.json({ data });
