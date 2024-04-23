@@ -21,11 +21,11 @@ model Student {
 }
 
 model Project {
-    Project_id   Int           @id @default(autoincrement())
-    title        String
+    Project_id   String           @id @default(autoincrement())
+    title        String 
     description  String?
-    startDate    DateTime 
-    endDate      DateTime
+    startDate    Date
+    endDate      Date
     status       String
     students     Project_Student[]
     advisors     Project_advisor[]
