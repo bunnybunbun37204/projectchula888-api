@@ -21,7 +21,7 @@ project.post("/", async (c) => {
   const studentIds = data.studentIds;
   const advisorIds = data.advisorIds;
 
-  await prisma.project.create({
+  const project = await prisma.project.create({
     data: {
       title: data.title,
       description: data.description,
@@ -30,6 +30,24 @@ project.post("/", async (c) => {
       endDate: data.endDate,
     },
   });
+  studentIds.map(async (value) => {
+    await prisma.project_Student.create({
+      data: {
+        project_id: project.project_id,
+        student_id: value.toString(),
+      },
+    });
+  });
+
+  advisorIds.map(async (value) => {
+    await prisma.project_advisor.create({
+      data: {
+        project_id: project.project_id,
+        advisor_id: value.toString(),
+      },
+    });
+  });
+
   return c.json({ message: "Create Project success" });
 });
 
@@ -45,6 +63,7 @@ project.patch("/", async (c) => {
     },
     data: data,
   });
+
   return c.json({ message: "Update success" });
 });
 

@@ -1,4 +1,4 @@
-import { advisors, Project_advisor, Student } from "@prisma/client";
+import { Project_advisor, Student } from "@prisma/client";
 
 export type Binding = {
   DB: D1Database;
@@ -10,6 +10,6 @@ export interface ProjectWithStudentsAndAdvisors {
   startDate: Date;
   endDate: Date;
   status: string;
-  studentIds: number[]; // Assuming student IDs are numbers
-  advisorIds: number[]; // Assuming advisor IDs are numbers
-};
+  studentIds: String[]; // Assuming student IDs are numbers
+  advisorIds: String[]; // Assuming advisor IDs are numbers
+}
