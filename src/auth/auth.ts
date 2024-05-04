@@ -62,7 +62,6 @@ auth.get("/callback/:ticket", async (c) => {
     DeeAppSecret
   );
   if (status === 200 && message != null) {
-    console.log(message);
     const datas: UserData = message as UserData;
     return c.json({ message: datas });
   }
