@@ -20,33 +20,39 @@ project.post("/", async (c) => {
   const data = await c.req.json<ProjectWithStudentsAndAdvisors>();
   const studentIds = data.studentIds;
   const advisorIds = data.advisorIds;
+  const number = await prisma.project.count();
 
-  const project = await prisma.project.create({
-    data: {
-      title: data.title,
-      description: data.description,
-      status: data.status,
-      startDate: data.startDate,
-      endDate: data.endDate,
-    },
-  });
-  studentIds.map(async (value) => {
-    await prisma.project_Student.create({
-      data: {
-        project_id: project.project_id,
-        student_id: value.toString(),
-      },
-    });
+  let advisorData: { advisor_id: string; project_id: number }[] = [];
+  let studentData: { student_id: string; project_id: number }[] = [];
+
+  advisorIds.map((id) => {
+    advisorData.push({ advisor_id: id.toString(), project_id: number + 1 });
   });
 
-  advisorIds.map(async (value) => {
-    await prisma.project_advisor.create({
-      data: {
-        project_id: project.project_id,
-        advisor_id: value.toString(),
-      },
-    });
+  studentIds.map((id) => {
+    studentData.push({ student_id: id.toString(), project_id: number + 1 });
   });
+
+  console.log(advisorData);
+  console.log(studentData);
+
+  await prisma.$transaction([
+    prisma.project.create({
+      data: {
+        title: data.title,
+        description: data.description,
+        status: data.status,
+        startDate: data.startDate,
+        endDate: data.endDate,
+      },
+    }),
+    prisma.project_advisor.createMany({
+      data: advisorData,
+    }),
+    prisma.project_Student.createMany({
+      data: studentData,
+    }),
+  ]);
 
   return c.json({ message: "Create Project success" });
 });
