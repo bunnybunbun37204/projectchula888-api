@@ -13,3 +13,16 @@ export interface ProjectWithStudentsAndAdvisors {
   studentIds: String[]; // Assuming student IDs are numbers
   advisorIds: String[]; // Assuming advisor IDs are numbers
 }
+
+export interface UserData {
+  firstname: string;
+  lastname: string;
+  ouid: string;
+  username: string;
+  gecos: string;
+  email: string;
+  disable: boolean;
+  roles: string[];
+  firtnameth: string;
+  lastnameth: string;
+}
