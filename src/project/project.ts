@@ -20,32 +20,37 @@ project.post("/", async (c) => {
   const data = await c.req.json<ProjectWithStudentsAndAdvisors>();
   const studentIds = data.studentIds;
   const advisorIds = data.advisorIds;
-  const number = await prisma.project.count();
 
   let advisorData: { advisor_id: string; project_id: number }[] = [];
   let studentData: { student_id: string; project_id: number }[] = [];
 
+  await prisma.project.create({
+    data: {
+      title: data.title,
+      description: data.description,
+      status: data.status,
+      startDate: data.startDate,
+      endDate: data.endDate,
+    },
+  });
+  const latestQuery = await prisma.project.findMany({
+    orderBy: {
+      project_id: "desc",
+    },
+    take: 1,
+  });
+
+  const number = latestQuery[0].project_id;
+  
   advisorIds.map((id) => {
-    advisorData.push({ advisor_id: id.toString(), project_id: number + 1 });
+    advisorData.push({ advisor_id: id.toString(), project_id: number });
   });
 
   studentIds.map((id) => {
-    studentData.push({ student_id: id.toString(), project_id: number + 1 });
+    studentData.push({ student_id: id.toString(), project_id: number });
   });
 
-  console.log(advisorData);
-  console.log(studentData);
-
   await prisma.$transaction([
-    prisma.project.create({
-      data: {
-        title: data.title,
-        description: data.description,
-        status: data.status,
-        startDate: data.startDate,
-        endDate: data.endDate,
-      },
-    }),
     prisma.project_advisor.createMany({
       data: advisorData,
     }),
