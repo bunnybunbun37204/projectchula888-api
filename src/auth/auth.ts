@@ -76,7 +76,7 @@ auth.get("/callback/:ticket", async (c) => {
     )) as cacheUserData;
 
     // if student id is in cache return;
-    if (datas.username === cacheData.id) {
+    if (cacheData) {
       return c.json({ result: cacheData });
     }
 
