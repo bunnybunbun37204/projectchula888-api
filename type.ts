@@ -1,7 +1,10 @@
-import { Project_advisor, Student } from "@prisma/client";
-
 export type Binding = {
   DB: D1Database;
+  KV: KVNamespace;
+  DeeAppId: string;
+  DeeAppSecret: string;
+  UPSTASH_REDIS_REST_TOKEN:string;
+  UPSTASH_REDIS_REST_URL:string;
 };
 
 export interface ProjectWithStudentsAndAdvisors {

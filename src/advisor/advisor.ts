@@ -2,6 +2,7 @@ import { Hono } from "hono";
 import { Binding } from "../../type";
 import { PrismaD1 } from "@prisma/adapter-d1";
 import { Advisor, PrismaClient } from "@prisma/client";
+import { Redis } from "@upstash/redis/cloudflare";
 
 const advisor = new Hono<{ Bindings: Binding }>();
 
@@ -10,6 +11,18 @@ advisor.get("/", async (c) => {
   const prisma = new PrismaClient({ adapter });
   const result = await prisma.advisor.findMany();
   return c.json({ result });
+});
+
+//! FOR TESTING REDIS
+advisor.get("/redis", async (c) => {
+  const UPSTASH_REDIS_REST_TOKEN = c.env.UPSTASH_REDIS_REST_TOKEN;
+  const UPSTASH_REDIS_REST_URL = c.env.UPSTASH_REDIS_REST_URL;
+  const redis = Redis.fromEnv({
+    UPSTASH_REDIS_REST_TOKEN: UPSTASH_REDIS_REST_TOKEN,
+    UPSTASH_REDIS_REST_URL: UPSTASH_REDIS_REST_URL,
+  });
+  const data = await redis.get("advisor");
+  return c.json({ data });
 });
 
 advisor.post("/", async (c) => {

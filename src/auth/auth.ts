@@ -1,9 +1,8 @@
 import { Hono } from "hono";
 import { deleteCookie } from "hono/cookie";
-import { env } from "hono/adapter";
-import { UserData } from "../../type";
+import { Binding, UserData } from "../../type";
 
-const auth = new Hono();
+const auth = new Hono<{ Bindings: Binding }>();
 
 const serviceValidation = async (
   ticket: string,
@@ -46,8 +45,8 @@ const serviceValidation = async (
 };
 
 auth.get("/callback/:ticket", async (c) => {
-  const { DeeAppId } = env<{ DeeAppId: string }>(c);
-  const { DeeAppSecret } = env<{ DeeAppSecret: string }>(c);
+  const DeeAppId  = c.env.DeeAppId;
+  const DeeAppSecret = c.env.DeeAppSecret;
   const ticket = c.req.param("ticket");
   if (!ticket || !DeeAppId || !DeeAppSecret) {
     return c.json({
