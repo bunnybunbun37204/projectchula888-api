@@ -1,5 +1,4 @@
 import { Hono } from "hono";
-import { deleteCookie } from "hono/cookie";
 import { Binding, cacheUserData, UserData } from "../../type";
 import { Redis } from "@upstash/redis/cloudflare";
 import { PrismaD1 } from "@prisma/adapter-d1";
@@ -47,10 +46,12 @@ const serviceValidation = async (
   }
 };
 
-auth.get("/callback/:ticket", async (c) => {
+auth.get("/register/:ticket", async (c) => {
   const DeeAppId = c.env.DeeAppId;
   const DeeAppSecret = c.env.DeeAppSecret;
   const ticket = c.req.param("ticket");
+
+  // if ticket and token is missing return 400;
   if (!ticket || !DeeAppId || !DeeAppSecret) {
     return c.json({
       message: "Ticket or app id or app secret is missing",
@@ -58,19 +59,22 @@ auth.get("/callback/:ticket", async (c) => {
     });
   }
 
+  // fetch user data from chula api
   const { status, message } = await serviceValidation(
     ticket,
     DeeAppId,
     DeeAppSecret
   );
+
+  // if fetching success
   if (status === 200 && message != null) {
     const datas: UserData = message as UserData;
-
     const redis = Redis.fromEnv({
       UPSTASH_REDIS_REST_TOKEN: c.env.UPSTASH_REDIS_REST_TOKEN,
       UPSTASH_REDIS_REST_URL: c.env.UPSTASH_REDIS_REST_URL,
     });
 
+    // find cache data on Redis by id
     const cacheData: cacheUserData = (await redis.get(
       datas.username
     )) as cacheUserData;
@@ -93,6 +97,7 @@ auth.get("/callback/:ticket", async (c) => {
       faculty: datas.gecos.split(", ")[1].trim(),
     };
 
+    // save users to register;
     if (result.role === "student") {
       await prisma.student.create({
         data: {
@@ -113,6 +118,7 @@ auth.get("/callback/:ticket", async (c) => {
       });
     }
 
+    // add cache
     await redis.set(result.id, JSON.stringify(result));
 
     return c.json({ result });
@@ -122,9 +128,6 @@ auth.get("/callback/:ticket", async (c) => {
 });
 
 auth.get("/signout", (c) => {
-  deleteCookie(c, "first_name");
-  deleteCookie(c, "last_name");
-  deleteCookie(c, "student_id");
   return c.redirect(
     "https://account.it.chula.ac.th/logout?service=https://projectchula888.pages.dev/"
   );
