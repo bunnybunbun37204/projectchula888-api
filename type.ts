@@ -26,6 +26,15 @@ export interface UserData {
   email: string;
   disable: boolean;
   roles: string[];
-  firtnameth: string;
+  firstnameth: string;
   lastnameth: string;
+}
+
+export interface cacheUserData {
+  fname: string,
+  lname: string,
+  id: string,
+  email: string,
+  role: string,
+  faculty: string
 }

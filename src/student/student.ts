@@ -2,7 +2,8 @@ import { Hono } from "hono";
 import { PrismaClient, Student } from "@prisma/client";
 import { PrismaD1 } from "@prisma/adapter-d1";
 import { HTTPException } from "hono/http-exception";
-import { Binding } from "../../type";
+import { Binding, cacheUserData } from "../../type";
+import { Redis } from "@upstash/redis/cloudflare";
 
 const student = new Hono<{ Bindings: Binding }>();
 
@@ -54,6 +55,11 @@ student.patch("/", async (c) => {
   const adapter = new PrismaD1(c.env.DB);
   const prisma = new PrismaClient({ adapter });
 
+  const redis = Redis.fromEnv({
+    UPSTASH_REDIS_REST_TOKEN: c.env.UPSTASH_REDIS_REST_TOKEN,
+    UPSTASH_REDIS_REST_URL: c.env.UPSTASH_REDIS_REST_URL,
+  });
+
   const data = await c.req.json<Student>();
 
   await prisma.student.update({
@@ -66,6 +72,18 @@ student.patch("/", async (c) => {
       major: data.major,
     },
   });
+
+  const result: cacheUserData = {
+    email: data.email,
+    fname : data.name.split(' ')[0],
+    lname: data.name.split(' ')[1],
+    faculty: data.major,
+    id: data.student_id,
+    role: 'student'
+  }
+
+  await redis.set(result.id, JSON.stringify(result));
+
   return c.json({ message: "Update success" });
 });
 
