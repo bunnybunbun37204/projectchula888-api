@@ -3,48 +3,9 @@ import { Binding, cacheUserData, UserData } from "../../type";
 import { Redis } from "@upstash/redis/cloudflare";
 import { PrismaD1 } from "@prisma/adapter-d1";
 import { PrismaClient } from "@prisma/client";
+import { serviceValidation } from "../../utils";
 
 const auth = new Hono<{ Bindings: Binding }>();
-
-const serviceValidation = async (
-  ticket: string,
-  DeeAppId: string,
-  DeeAppSecret: string
-) => {
-  try {
-    const url = "https://account.it.chula.ac.th/serviceValidation";
-    const response = await fetch(url, {
-      method: "POST",
-      headers: {
-        DeeAppId: DeeAppId,
-        DeeAppSecret: DeeAppSecret,
-        DeeTicket: ticket,
-        "Access-Control-Allow-Origin": "*",
-        "Access-Control-Allow-Headers": "*",
-        "Content-type": "application/json",
-      },
-    });
-
-    if (response.ok) {
-      const jsonResponse: UserData = await response.json();
-      return {
-        status: 200,
-        message: jsonResponse,
-      };
-    } else {
-      const jsonResponse = await response.json();
-      return {
-        status: response.status,
-        message: jsonResponse,
-      };
-    }
-  } catch (error) {
-    return {
-      status: 500,
-      message: error,
-    };
-  }
-};
 
 auth.get("/register/:ticket", async (c) => {
   const DeeAppId = c.env.DeeAppId;
