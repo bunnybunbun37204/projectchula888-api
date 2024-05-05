@@ -6,6 +6,8 @@ import advisor from "./advisor/advisor";
 import project_advisor from "./project_advisor/project_advisor";
 import project_student from "./project_student/project_student";
 import auth from "./auth/auth";
+import { Redis } from "@upstash/redis/cloudflare";
+import { env } from "hono/adapter";
 
 const app = new Hono();
 
@@ -13,6 +15,20 @@ app.use(logger());
 
 app.get("/", (c) => {
   return c.text("Hello Hono!");
+});
+
+//! FOR TESTING REDIS
+app.get("/redis", async (c) => {
+  const { UPSTASH_REDIS_REST_TOKEN } = env<{
+    UPSTASH_REDIS_REST_TOKEN: string;
+  }>(c);
+  const { UPSTASH_REDIS_REST_URL } = env<{ UPSTASH_REDIS_REST_URL: string }>(c);
+  const redis = Redis.fromEnv({
+    UPSTASH_REDIS_REST_TOKEN: UPSTASH_REDIS_REST_TOKEN,
+    UPSTASH_REDIS_REST_URL: UPSTASH_REDIS_REST_URL,
+  });
+  const data = await redis.get("advisor");
+  return c.json({ data });
 });
 
 app.notFound((c) => {
