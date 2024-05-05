@@ -1,6 +1,7 @@
 import { Hono } from "hono";
 import { deleteCookie } from "hono/cookie";
 import { Binding, UserData } from "../../type";
+import { Redis } from "@upstash/redis/cloudflare";
 
 const auth = new Hono<{ Bindings: Binding }>();
 
@@ -24,7 +25,7 @@ const serviceValidation = async (
     });
 
     if (response.ok) {
-      const jsonResponse = await response.json();
+      const jsonResponse: UserData = await response.json();
       return {
         status: 200,
         message: jsonResponse,
@@ -45,7 +46,7 @@ const serviceValidation = async (
 };
 
 auth.get("/callback/:ticket", async (c) => {
-  const DeeAppId  = c.env.DeeAppId;
+  const DeeAppId = c.env.DeeAppId;
   const DeeAppSecret = c.env.DeeAppSecret;
   const ticket = c.req.param("ticket");
   if (!ticket || !DeeAppId || !DeeAppSecret) {
@@ -62,6 +63,15 @@ auth.get("/callback/:ticket", async (c) => {
   );
   if (status === 200 && message != null) {
     const datas: UserData = message as UserData;
+    const student_id = datas.username;
+
+    const redis = Redis.fromEnv({
+      UPSTASH_REDIS_REST_TOKEN: c.env.UPSTASH_REDIS_REST_TOKEN,
+      UPSTASH_REDIS_REST_URL: c.env.UPSTASH_REDIS_REST_URL,
+    });
+
+    await redis.set(student_id, 'logined');
+
     return c.json({ message: datas });
   }
 
