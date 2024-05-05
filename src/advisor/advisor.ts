@@ -21,8 +21,8 @@ advisor.get("/redis", async (c) => {
     UPSTASH_REDIS_REST_TOKEN: UPSTASH_REDIS_REST_TOKEN,
     UPSTASH_REDIS_REST_URL: UPSTASH_REDIS_REST_URL,
   });
-  const data = await redis.get("advisor");
-  return c.json({ data });
+  const result = await redis.get("advisor");
+  return c.json({ result });
 });
 
 advisor.post("/", async (c) => {
