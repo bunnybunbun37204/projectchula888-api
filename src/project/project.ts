@@ -9,25 +9,6 @@ const project = new Hono<{ Bindings: Binding }>();
 project.get("/", async (c) => {
   const adapter = new PrismaD1(c.env.DB);
   const prisma = new PrismaClient({ adapter });
-  const result = await prisma.project.findMany();
-  return c.json({ result });
-});
-
-project.get("/all", async (c) => {
-  const adapter = new PrismaD1(c.env.DB);
-  const prisma = new PrismaClient({ adapter });
-  const result = await prisma.project.findMany({
-    include: {
-      students: true,
-      advisors: true,
-    },
-  });
-  return c.json({ result });
-});
-
-project.get("/filter", async (c) => {
-  const adapter = new PrismaD1(c.env.DB);
-  const prisma = new PrismaClient({ adapter });
   const student = c.req.queries("student") || [];
   const advisor = c.req.queries("advisor") || [];
   const startDateString = c.req.query("start") as string | undefined;
