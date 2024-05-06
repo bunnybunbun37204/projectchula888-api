@@ -4,6 +4,7 @@ import { Redis } from "@upstash/redis/cloudflare";
 import { PrismaD1 } from "@prisma/adapter-d1";
 import { PrismaClient } from "@prisma/client";
 import { serviceValidation } from "../../utils";
+import { HTTPException } from "hono/http-exception";
 
 const auth = new Hono<{ Bindings: Binding }>();
 
@@ -96,6 +97,16 @@ auth.get("/signout", (c) => {
 
 auth.get("/t", (c) => {
   return c.text("Hello");
+});
+
+auth.onError((err) => {
+  if (err instanceof HTTPException) {
+    return err.getResponse();
+  }
+  throw new HTTPException(400, {
+    message: (err as Error).message,
+    cause: (err as Error).cause,
+  });
 });
 
 export default auth;
