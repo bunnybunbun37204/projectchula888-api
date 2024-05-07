@@ -1,8 +1,14 @@
 import { Hono } from "hono";
-import { Binding, ProjectWithStudentsAndAdvisors } from "../../type";
+import { Binding, ProjectQ, ProjectWithStudentsAndAdvisors } from "../../type";
 import { PrismaD1 } from "@prisma/adapter-d1";
 import { PrismaClient, Project } from "@prisma/client";
 import { HTTPException } from "hono/http-exception";
+import {
+  filterProjectsByAdvisorIds,
+  filterProjectsByEndDate,
+  filterProjectsByStartDate,
+  filterProjectsByStudentIds,
+} from "../../utils";
 
 const project = new Hono<{ Bindings: Binding }>();
 
@@ -27,30 +33,30 @@ project.get("/", async (c) => {
     endDate.setUTCHours(0, 0, 0, 0);
   }
 
-  const where = {
-    students:
-      student.length > 1
-        ? { every: { student_id: { in: student } } }
-        : student.length !== 0
-        ? { some: { student_id: { in: student } } }
-        : undefined,
-    advisors:
-      advisor.length > 1
-        ? { every: { advisor_id: { in: advisor } } }
-        : advisor.length !== 0
-        ? { some: { advisor_id: { in: advisor } } }
-        : undefined,
-    startDate: startDate ? { equals: startDate } : undefined,
-    endDate: endDate ? { equals: endDate } : undefined,
-  };
-
-  const result = await prisma.project.findMany({
-    where: where,
+  const data = (await prisma.project.findMany({
     include: {
-      students: true,
       advisors: true,
+      students: true,
     },
-  });
+  })) as unknown as ProjectQ[];
+
+  let result = data;
+
+  if (student && student.length > 0) {
+    result = filterProjectsByStudentIds(data, student);
+  }
+
+  if (advisor && advisor.length > 0) {
+    result = filterProjectsByAdvisorIds(result, advisor);
+  }
+
+  if (startDateString) {
+    result = filterProjectsByStartDate(result, startDateString);
+  }
+
+  if (endDateString) {
+    result = filterProjectsByEndDate(result, endDateString);
+  }
 
   return c.json({ result });
 });

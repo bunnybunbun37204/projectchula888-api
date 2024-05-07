@@ -13,8 +13,8 @@ export interface ProjectWithStudentsAndAdvisors {
   startDate: Date;
   endDate: Date;
   status: string;
-  studentIds: String[]; // Assuming student IDs are numbers
-  advisorIds: String[]; // Assuming advisor IDs are numbers
+  studentIds: string[]; // Assuming student IDs are numbers
+  advisorIds: string[]; // Assuming advisor IDs are numbers
 }
 
 export interface UserData {
@@ -37,4 +37,15 @@ export interface cacheUserData {
   email: string,
   role: string,
   faculty: string
+}
+
+export interface ProjectQ {
+  project_id: number;
+  title: string;
+  description: string;
+  startDate: string;
+  endDate: string;
+  status: string;
+  students: { student_id: string, project_id: number }[];
+  advisors: { advisor_id: string, project_id: number }[];
 }
