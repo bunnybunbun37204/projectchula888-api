@@ -57,7 +57,56 @@ project.get("/", async (c) => {
   if (endDateString) {
     result = filterProjectsByEndDate(result, endDateString);
   }
+  return c.json({ result });
+});
 
+project.get("/:id", async (c) => {
+  const adapter = new PrismaD1(c.env.DB);
+  const prisma = new PrismaClient({ adapter });
+  const id = c.req.param("id");
+  const student = c.req.queries("student") || [];
+  const advisor = c.req.queries("advisor") || [];
+  const startDateString = c.req.query("start") as string | undefined;
+  const endDateString = c.req.query("end") as string | undefined;
+
+  let startDate: Date | undefined;
+  let endDate: Date | undefined;
+  const data = await prisma.project.findMany({
+    where: {
+      project_id: parseInt(id),
+    },include: {
+      advisors: true,
+      students: true,
+    },
+  }) as unknown as ProjectQ[];
+
+  if (startDateString) {
+    startDate = new Date(startDateString);
+    startDate.setUTCHours(0, 0, 0, 0);
+  }
+
+  if (endDateString) {
+    endDate = new Date(endDateString);
+    endDate.setUTCHours(0, 0, 0, 0);
+  }
+
+  let result = data;
+
+  if (student && student.length > 0) {
+    result = filterProjectsByStudentIds(data, student);
+  }
+
+  if (advisor && advisor.length > 0) {
+    result = filterProjectsByAdvisorIds(result, advisor);
+  }
+
+  if (startDateString) {
+    result = filterProjectsByStartDate(result, startDateString);
+  }
+
+  if (endDateString) {
+    result = filterProjectsByEndDate(result, endDateString);
+  }
   return c.json({ result });
 });
 
@@ -149,7 +198,6 @@ project.delete("/", async (c) => {
       },
     }),
   ]);
-
   return c.json({ message: "Delete success" });
 });
 
@@ -162,5 +210,4 @@ project.onError((err) => {
     cause: (err as Error).cause,
   });
 });
-
 export default project;
