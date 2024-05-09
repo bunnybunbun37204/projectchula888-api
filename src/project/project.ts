@@ -22,6 +22,12 @@ project.get("/", async (c) => {
 
   let startDate: Date | undefined;
   let endDate: Date | undefined;
+  const data = (await prisma.project.findMany({
+    include: {
+      advisors: true,
+      students: true,
+    },
+  })) as unknown as ProjectQ[];
 
   if (startDateString) {
     startDate = new Date(startDateString);
@@ -33,12 +39,100 @@ project.get("/", async (c) => {
     endDate.setUTCHours(0, 0, 0, 0);
   }
 
+  let result = data;
+
+  if (student && student.length > 0) {
+    result = filterProjectsByStudentIds(data, student);
+  }
+
+  if (advisor && advisor.length > 0) {
+    result = filterProjectsByAdvisorIds(result, advisor);
+  }
+
+  if (startDateString) {
+    result = filterProjectsByStartDate(result, startDateString);
+  }
+
+  if (endDateString) {
+    result = filterProjectsByEndDate(result, endDateString);
+  }
+
+  let studentInput: string[] = [];
+  let advisorInput: string[] = [];
+
+  result.map((value) => {
+    value.students.map((student) => {
+      studentInput.push(student.student_id);
+    });
+    value.advisors.map((advisor) => {
+      advisorInput.push(advisor.advisor_id);
+    });
+  });
+
+  const students = await prisma.student.findMany({
+    where: {
+      student_id: {
+        in: studentInput,
+      },
+    },
+  });
+
+  const advisors = await prisma.advisor.findMany({
+    where: {
+      advisor_id: {
+        in: advisorInput,
+      },
+    },
+  });
+
+  result.forEach((project) => {
+    project.students = project.students.map((student) => {
+      let matchedStudent = students.find(
+        (s) => s.student_id === student.student_id
+      );
+      return matchedStudent ? { ...student, ...matchedStudent } : student;
+    });
+    project.advisors = project.advisors.map((advisor) => {
+      let matchedAdvisor = advisors.find(
+        (a) => a.advisor_id === advisor.advisor_id
+      );
+      return matchedAdvisor ? { ...advisor, ...matchedAdvisor } : advisor;
+    });
+  });
+
+  return c.json({ result });
+});
+
+project.get("/:id", async (c) => {
+  const adapter = new PrismaD1(c.env.DB);
+  const prisma = new PrismaClient({ adapter });
+  const id = c.req.param("id");
+  const student = c.req.queries("student") || [];
+  const advisor = c.req.queries("advisor") || [];
+  const startDateString = c.req.query("start") as string | undefined;
+  const endDateString = c.req.query("end") as string | undefined;
+
+  let startDate: Date | undefined;
+  let endDate: Date | undefined;
   const data = (await prisma.project.findMany({
+    where: {
+      project_id: parseInt(id),
+    },
     include: {
       advisors: true,
       students: true,
     },
   })) as unknown as ProjectQ[];
+
+  if (startDateString) {
+    startDate = new Date(startDateString);
+    startDate.setUTCHours(0, 0, 0, 0);
+  }
+
+  if (endDateString) {
+    endDate = new Date(endDateString);
+    endDate.setUTCHours(0, 0, 0, 0);
+  }
 
   let result = data;
 
@@ -206,7 +300,6 @@ project.delete("/", async (c) => {
       },
     }),
   ]);
-
   return c.json({ message: "Delete success" });
 });
 
@@ -219,5 +312,4 @@ project.onError((err) => {
     cause: (err as Error).cause,
   });
 });
-
 export default project;

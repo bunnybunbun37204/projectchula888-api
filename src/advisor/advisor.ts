@@ -2,6 +2,7 @@ import { Hono } from "hono";
 import { Binding, cacheUserData } from "../../type";
 import { PrismaD1 } from "@prisma/adapter-d1";
 import { Advisor, PrismaClient } from "@prisma/client";
+import { HTTPException } from "hono/http-exception";
 import { Redis } from "@upstash/redis/cloudflare";
 
 const advisor = new Hono<{ Bindings: Binding }>();
@@ -11,6 +12,19 @@ advisor.get("/", async (c) => {
   const prisma = new PrismaClient({ adapter });
   const result = await prisma.advisor.findMany();
   return c.json({ result });
+});
+
+advisor.get("/:id", async (c) => {
+  const adapter = new PrismaD1(c.env.DB);
+  const prisma = new PrismaClient({ adapter });
+  const id = c.req.param("id");
+
+  const data = await prisma.advisor.findMany({
+    where: {
+      advisor_id: id,
+    },
+  });
+  return c.json({ data });
 });
 
 advisor.post("/", async (c) => {
@@ -51,8 +65,8 @@ advisor.patch("/", async (c) => {
 
   const result: cacheUserData = {
     email: data.email,
-    fname: data.name.split(" ")[0],
-    lname: data.name.split(" ")[1],
+    fname: data.name.split(" ").length==1? data.name:data.name.split(' ')[0],
+    lname: data.name.split(" ").length==1? ' ':data.name.split(' ')[1],
     faculty: data.department,
     id: data.advisor_id,
     role: "advisor",
@@ -75,6 +89,16 @@ advisor.delete("/", async (c) => {
   });
 
   return c.json({ message: "delete advisor success" });
+});
+
+advisor.onError((err) => {
+  if (err instanceof HTTPException) {
+    return err.getResponse();
+  }
+  throw new HTTPException(400, {
+    message: (err as Error).message,
+    cause: (err as Error).cause,
+  });
 });
 
 export default advisor;
