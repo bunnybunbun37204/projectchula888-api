@@ -75,12 +75,20 @@ student.patch("/", async (c) => {
 
   const result: cacheUserData = {
     email: data.email,
-    fname : data.name.split(' ').length==1? data.name:data.name.split(' ')[0],
-    lname: data.name.split(' ').length==1? ' ':data.name.split(' ')[1],
+    fname: data.name
+      ? data.name.split(" ").length == 1
+        ? data.name
+        : data.name.split(" ")[0]
+      : data.name,
+    lname: data.name
+      ? data.name.split(" ").length == 1
+        ? " "
+        : data.name.split(" ")[1]
+      : " ",
     faculty: data.major,
     id: data.student_id,
-    role: 'student'
-  }
+    role: "student",
+  };
 
   await redis.set(result.id, JSON.stringify(result));
 
