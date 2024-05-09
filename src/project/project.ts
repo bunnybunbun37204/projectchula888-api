@@ -264,18 +264,65 @@ project.post("/", async (c) => {
 project.patch("/", async (c) => {
   const adapter = new PrismaD1(c.env.DB);
   const prisma = new PrismaClient({ adapter });
+  const data = await c.req.json<ProjectQ>();
 
-  const data = await c.req.json<Project>();
+  let advisorData: { advisor_id: string; project_id: number }[] = [];
+  let studentData: { student_id: string; project_id: number }[] = [];
+  const number = data.project_id;
+
+  data.advisors.map((id) => {
+    advisorData.push({ advisor_id: id.toString(), project_id: number });
+  });
+  data.students.map((id) => {
+    studentData.push({ student_id: id.toString(), project_id: number });
+  });
 
   await prisma.project.update({
     where: {
       project_id: data.project_id,
     },
-    data: data,
+    data: {
+      title: data.title || undefined,
+      description: data.description || undefined,
+      startDate: data.startDate || undefined,
+      endDate: data.endDate || undefined,
+      status: data.status || undefined,
+    },
+  });
+
+  await prisma.project_advisor.deleteMany({
+    where: {
+      project_id: data.project_id,
+      advisor_id: {
+        notIn: data.advisors.map((advisor) => advisor.toString()),
+      },
+    },
+  });
+
+  await prisma.project_Student.deleteMany({
+    where: {
+      project_id: data.project_id,
+      student_id: {
+        notIn: data.students.map((student) => student.toString()),
+      },
+    },
+  });
+
+  await prisma.project_advisor.createMany({
+    data: advisorData.filter((advisor) => {
+      return !data.advisors.includes({advisor_id: advisor.advisor_id, project_id: advisor.project_id});
+    }),
+  });
+
+  await prisma.project_Student.createMany({
+    data: studentData.filter((student) => {
+      return !data.students.includes({student_id: student.student_id, project_id: student.project_id});
+    }),
   });
 
   return c.json({ message: "Update success" });
 });
+
 
 project.delete("/", async (c) => {
   const adapter = new PrismaD1(c.env.DB);
