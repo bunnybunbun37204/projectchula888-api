@@ -4,6 +4,7 @@
     "deploy": "wrangler deploy --minify src/index.ts"
   },
   "dependencies": {
+    ".": ".",
     "@prisma/adapter-d1": "^5.12.1",
     "@prisma/client": "^5.12.1",
     "@upstash/redis": "^1.30.0",

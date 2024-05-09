@@ -10,7 +10,7 @@ const app = new Hono();
 app.use(logger());
 
 app.get("/", (c) => {
-  return c.text("Hello Hono!");
+  return c.text("Hello Honooo!");
 });
 
 app.notFound((c) => {
