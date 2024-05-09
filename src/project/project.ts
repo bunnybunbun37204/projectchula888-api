@@ -1,7 +1,7 @@
 import { Hono } from "hono";
 import { Binding, ProjectQ, ProjectWithStudentsAndAdvisors } from "../../type";
 import { PrismaD1 } from "@prisma/adapter-d1";
-import { PrismaClient, Project } from "@prisma/client";
+import { PrismaClient, Project, Student } from "@prisma/client";
 import { HTTPException } from "hono/http-exception";
 import {
   filterProjectsByAdvisorIds,
@@ -58,6 +58,63 @@ project.get("/", async (c) => {
     result = filterProjectsByEndDate(result, endDateString);
   }
 
+  let studentInput: string[] = [];
+  let advisorInput: string[] = [];
+
+  result.map((value) => {
+    value.students.map((student) => {
+      studentInput.push(student.student_id);
+    });
+    value.advisors.map((advisor) => {
+      advisorInput.push(advisor.advisor_id);
+    });
+  });
+
+  const students = await prisma.student.findMany({
+    where: {
+      student_id: {
+        in: studentInput,
+      },
+    },
+  });
+
+  const advisors = await prisma.advisor.findMany({
+    where: {
+      advisor_id: {
+        in: advisorInput,
+      },
+    },
+  });
+
+  result.forEach((project) => {
+    project.students = project.students.map((student) => {
+      let matchedStudent = students.find(
+        (s) => s.student_id === student.student_id
+      );
+      return matchedStudent ? { ...student, ...matchedStudent } : student;
+    });
+    project.advisors = project.advisors.map((advisor) => {
+      let matchedAdvisor = advisors.find(
+        (a) => a.advisor_id === advisor.advisor_id
+      );
+      return matchedAdvisor ? { ...advisor, ...matchedAdvisor } : advisor;
+    });
+  });
+
+  return c.json({ result });
+});
+
+project.get("/test", async (c) => {
+  const adapter = new PrismaD1(c.env.DB);
+  const prisma = new PrismaClient({ adapter });
+  const studentIds = ["6534435223", "6534435224"];
+  const result = await prisma.student.findMany({
+    where: {
+      student_id: {
+        in: studentIds,
+      },
+    },
+  });
   return c.json({ result });
 });
 
